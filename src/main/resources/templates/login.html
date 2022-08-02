@@ -5,7 +5,8 @@
   <title>Spring Security Example </title>
 </head>
 <body>
-<div th:if="${param.error}">
+<div th:insert="~{fragments/menu :: #nav-menu}"></div>
+<div th:if="${loginError}" class="error">
   Invalid username and password.
 </div>
 <div th:if="${param.logout}">
