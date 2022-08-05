@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,6 +52,35 @@ public class UserServiceImpl implements UserService{
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public User findByName(String name) {
+        return userRepo.findFirstByName(name);
+    }
+
+    @Override
+    @Transactional
+    public void updateProfile(UserDTO dto) {
+       User savedUser = userRepo.findFirstByName(dto.getUsername());
+       if (savedUser == null) {
+           throw new RuntimeException("User not found");
+       }
+
+       boolean isChanged = false;
+       if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+           savedUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+           isChanged = true;
+       }
+
+       if (!Objects.equals(dto.getEmail(), savedUser.getEmail())) {
+           savedUser.setEmail(dto.getEmail());
+           isChanged = true;
+       }
+
+       if (isChanged) {
+           userRepo.save(savedUser);
+       }
+    }
+
     private UserDTO toDto(User user) {
        return UserDTO.builder()
                .username(user.getName())
@@ -60,7 +90,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepo.findByName(username);
+        User user = userRepo.findFirstByName(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
