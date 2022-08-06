@@ -89,7 +89,6 @@ create table users
     email     varchar(255),
     archive   boolean not null,
     role      varchar(255),
-    bucket_id int8,
     primary key (id)
 );
 alter table if exists orders_details
@@ -112,5 +111,3 @@ alter table if exists products_categories
     add constraint products_categories_category foreign key (category_id) references categories;
 alter table if exists products_categories
     add constraint products_categories_product foreign key (product_id) references products;
-alter table if exists users
-    add constraint users_bucket foreign key (bucket_id) references buckets;
