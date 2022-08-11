@@ -1,14 +1,15 @@
 package com.holdmelol.someshop.controllers;
 
+import com.holdmelol.someshop.aspect.LoggingUserController;
 import com.holdmelol.someshop.dto.UserDTO;
 import com.holdmelol.someshop.entities.User;
 import com.holdmelol.someshop.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.Objects;
@@ -29,11 +30,20 @@ public class UserController {
         return "userList";
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/new")
     public String newUser(Model model) {
         model.addAttribute("user", new UserDTO());
         return "user";
     }
+
+//    @PostAuthorize("isAuthenticated() and #username == authentication.principal.username")
+//    @GetMapping("/{name}/roles")
+//    @ResponseBody
+//    public String getRoles(@PathVariable("name") String username) {
+//        User byName = userService.findByName(username);
+//        return byName.getRole().name();
+//    }
 
     @PostMapping("/new")
     public String saveUser(UserDTO userDTO, Model model) {
@@ -60,6 +70,7 @@ public class UserController {
         return "profile";
     }
 
+    @LoggingUserController
     @PostMapping("/profile")
     public String updateProfileUser(UserDTO dto, Model model, Principal principal) {
         if (principal == null || !Objects.equals(principal.getName(), dto.getUsername())) {
